@@ -40,7 +40,9 @@ Proof of concept for AWS single sign-on using Java Spring Security and an intera
 
 Create a Cognito app client with callback URL `http://localhost:8080/login/oauth2/code/cognito` and sign-out URL `http://localhost:5173`. Enable `openid`, `profile`, and `email` scopes.
 
-Set these variables before starting the backend:
+Set these variables in the same terminal you will start the backend from.
+
+PowerShell:
 
 ```powershell
 $env:AWS_COGNITO_CLIENT_ID = "your-app-client-id"
@@ -48,21 +50,63 @@ $env:AWS_COGNITO_CLIENT_SECRET = "your-app-client-secret"
 $env:AWS_COGNITO_ISSUER_URI = "https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id"
 ```
 
+Bash, Git Bash, or WSL:
+
+```bash
+export AWS_COGNITO_CLIENT_ID="your-app-client-id"
+export AWS_COGNITO_CLIENT_SECRET="your-app-client-secret"
+export AWS_COGNITO_ISSUER_URI="https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id"
+```
+
 ## Run with the local simulator
 
-No AWS account or Cognito values are required for the simulated flow:
+No AWS account or Cognito values are required for the simulated flow.
 
-From `backend/`: `mvn spring-boot:run -Dspring-boot.run.profiles=mock`
+Start the backend from `backend/`.
 
-From `frontend/`: `npm run dev`
+PowerShell:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=mock"
+```
+
+Bash, Git Bash, or WSL:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=mock
+```
+
+Then start the frontend from `frontend/`, in either shell:
+
+```
+npm run dev
+```
+
+> **PowerShell users:** the quotes are required. PowerShell ends a `-`-prefixed
+> argument at the first `.`, so the unquoted form reaches Maven as two arguments,
+> `-Dspring-boot` and `.run.profiles=mock`, and fails with
+> `Unknown lifecycle phase ".run.profiles=mock"`. The quoted form works in every
+> shell, so use it if you want one command that is safe to copy anywhere.
 
 Open `http://localhost:5173` and choose **Sign in as demo user**. The backend creates a session containing a demo identity, so you can exercise the frontend and protected `/api/me` endpoint locally.
 
 ## Run with Cognito
 
-From `backend/`: `mvn spring-boot:run -Dspring-boot.run.profiles=local`
+Set the environment variables above, then start the backend from `backend/`.
 
-From `frontend/`: `npm install` then `npm run dev`
+PowerShell:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
+Bash, Git Bash, or WSL:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+Then, from `frontend/`, run `npm install` followed by `npm run dev`.
 
 Open `http://localhost:5173`. The Vite dev server proxies API and OAuth routes to port 8080.
 
@@ -84,7 +128,16 @@ Follow the flow in order. The screenshots below show the expected application st
 
 1. Start the backend with the `mock` profile.
 
-	From the project root, run this in Terminal 1:
+	From the project root, run this in Terminal 1.
+
+	PowerShell:
+
+	```powershell
+	cd backend
+	mvn spring-boot:run "-Dspring-boot.run.profiles=mock"
+	```
+
+	Bash, Git Bash, or WSL:
 
 	```bash
 	cd backend

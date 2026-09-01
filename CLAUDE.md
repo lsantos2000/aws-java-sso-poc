@@ -64,12 +64,16 @@ npm test -- -t "clears the authenticated identity"     # single test by name
 Backend, from `backend/`:
 
 ```powershell
-mvn spring-boot:run -Dspring-boot.run.profiles=mock    # no AWS needed
-mvn spring-boot:run -Dspring-boot.run.profiles=local   # requires the env vars below
+mvn spring-boot:run "-Dspring-boot.run.profiles=mock"    # no AWS needed
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"   # requires the env vars below
 mvn test
-mvn test -Dtest=AuthControllerUnitTest                                  # single class
-mvn test -Dtest=MockSsoE2ETest#mockLoginCreatesSessionThatCanAccessCurrentUser
+mvn test "-Dtest=AuthControllerUnitTest"                                  # single class
+mvn test "-Dtest=MockSsoE2ETest#mockLoginCreatesSessionThatCanAccessCurrentUser"
 ```
+
+Quote every `-D...` argument. PowerShell terminates a `-`-prefixed token at the first `.`, so an
+unquoted `-Dspring-boot.run.profiles=mock` arrives at Maven as `-Dspring-boot` plus a stray
+`.run.profiles=mock` that it reads as a lifecycle phase. Quoting is a no-op in Bash.
 
 Whole stack, from the repo root: `docker compose up --build` (backend forced to the `mock` profile, frontend served by nginx on 5173).
 
