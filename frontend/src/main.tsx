@@ -42,7 +42,7 @@ function App() {
       <article><span className="label">SESSION</span><strong className={status?.authenticated ? 'online' : ''}>{status?.authenticated ? 'Authenticated' : 'Awaiting sign-in'}</strong><span className="detail">HTTP-only session cookie</span></article>
     </section>
     {user && <section className="identity"><div><span className="label">CURRENT IDENTITY</span><h2>{user.name}</h2><p>{user.email}</p></div><code>{user.subject}</code></section>}
-    <footer><span>LOCAL DEVELOPMENT</span><span>Spring Boot · Vite · Cognito</span></footer>
+    <footer><span>LOCAL DEVELOPMENT</span><span>Spring Boot · Vite · Cognito</span><span>© 2026 Leonardo Santos-Macias · github.com/lsantos2000</span></footer>
   </main>;
 }
 
