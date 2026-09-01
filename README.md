@@ -100,6 +100,17 @@ Invoke-WebRequest http://localhost:8080/api/auth/mock-login -Method POST -WebSes
 Invoke-RestMethod http://localhost:8080/api/me -WebSession $session
 ```
 
+Test the mock session from Bash:
+
+```bash
+curl -i -c cookies.txt -X POST http://localhost:8080/api/auth/mock-login
+curl -i -b cookies.txt http://localhost:8080/api/me
+curl -i http://localhost:8080/api/me
+rm cookies.txt
+```
+
+The first request should return `200` and save the session cookie. The second request should return `200` with the demo identity. The third request should return `401` or `403` because it does not include the session cookie.
+
 The protected endpoint should return the demo identity. A request to `/api/me` without the session cookie should be rejected with HTTP `401` or `403`.
 
 ### Automated tests
