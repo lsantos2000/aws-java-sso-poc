@@ -114,9 +114,73 @@ of the demo — the handshake is visible instead of described.
 
 ## Configure Cognito
 
-Create a Cognito app client with callback URL [http://localhost:8080/login/oauth2/code/cognito](http://localhost:8080/login/oauth2/code/cognito) and sign-out URL [http://localhost:5173](http://localhost:5173). Enable `openid`, `profile`, and `email` scopes.
+Only needed for the `local` profile. The mock simulator requires none of this.
 
-Set these variables in the same terminal you will start the backend from.
+You need an existing Cognito **user pool** and the AWS CLI configured with credentials that can
+administer it. Substitute your own region and user pool ID throughout.
+
+### 1. Create the app client
+
+This project is a **confidential client**: the backend holds a client secret and exchanges the
+authorization code server to server. `--generate-secret` is therefore required — without it the
+command succeeds but returns no `ClientSecret`, and the backend has nothing to authenticate with.
+
+Bash, Git Bash, or WSL:
+
+```bash
+aws cognito-idp create-user-pool-client \
+    --user-pool-id "YOUR_USER_POOL_ID" \
+    --client-name "aws-java-sso-poc" \
+    --generate-secret \
+    --allowed-o-auth-flows "code" \
+    --allowed-o-auth-scopes "openid" "profile" "email" \
+    --allowed-o-auth-flows-user-pool-client \
+    --supported-identity-providers "COGNITO" \
+    --callback-urls "http://localhost:8080/login/oauth2/code/cognito" \
+    --logout-urls "http://localhost:5173"
+```
+
+PowerShell (same command; the continuation character is a backtick, and nothing may follow it on
+the line):
+
+```powershell
+aws cognito-idp create-user-pool-client `
+    --user-pool-id "YOUR_USER_POOL_ID" `
+    --client-name "aws-java-sso-poc" `
+    --generate-secret `
+    --allowed-o-auth-flows "code" `
+    --allowed-o-auth-scopes "openid" "profile" "email" `
+    --allowed-o-auth-flows-user-pool-client `
+    --supported-identity-providers "COGNITO" `
+    --callback-urls "http://localhost:8080/login/oauth2/code/cognito" `
+    --logout-urls "http://localhost:5173"
+```
+
+Keep the `ClientId` and `ClientSecret` from the output. The secret is shown once here; retrieve it
+later with `aws cognito-idp describe-user-pool-client --user-pool-id ... --client-id ...`.
+
+The callback URL points at port **8080**, not 5173. Cognito redirects to the backend, which
+performs the code exchange; the browser only reaches the frontend afterwards.
+
+### 2. Create a user pool domain
+
+The sign-in page (**managed login**, previously the **hosted UI**) does not exist until the pool
+has a domain. Without one there is no authorization endpoint to redirect to, and sign-in fails
+before Cognito is ever shown.
+
+```bash
+aws cognito-idp create-user-pool-domain \
+    --user-pool-id "YOUR_USER_POOL_ID" \
+    --domain "your-unique-prefix"
+```
+
+The prefix must be globally unique across AWS. This produces
+`https://your-unique-prefix.auth.<region>.amazoncognito.com`. Spring never needs that URL directly
+— it is discovered from the issuer in step 3 — but the pool will not serve a login page without it.
+
+### 3. Set the environment variables
+
+Set these in the same terminal you will start the backend from.
 
 PowerShell:
 
@@ -133,6 +197,39 @@ export AWS_COGNITO_CLIENT_ID="your-app-client-id"
 export AWS_COGNITO_CLIENT_SECRET="your-app-client-secret"
 export AWS_COGNITO_ISSUER_URI="https://cognito-idp.us-east-1.amazonaws.com/your-user-pool-id"
 ```
+
+These three names are what `backend/src/main/resources/application-local.yml` reads. There is no
+YAML to write — the file already binds them:
+
+```yaml
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          cognito:
+            client-id: ${AWS_COGNITO_CLIENT_ID}
+            client-secret: ${AWS_COGNITO_CLIENT_SECRET}
+        provider:
+          cognito:
+            issuer-uri: ${AWS_COGNITO_ISSUER_URI}
+```
+
+If you would rather bind Spring's properties directly, `SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_COGNITO_CLIENT_ID`
+and friends also work — but do not mix the two schemes. Starting the `local` profile with only the
+`SPRING_*` names set fails at startup, because the placeholders above stay unresolved.
+
+`AWS_COGNITO_ISSUER_URI` is the pool's issuer, not the discovery document. Spring appends
+`/.well-known/openid-configuration` itself.
+
+### 4. Start on the `local` profile
+
+Follow [Run with Cognito](#run-with-cognito) below. The frontend button changes from
+**Sign in as demo user** to **Continue with AWS SSO**, and the console's SESSION tab shows the
+redirect rather than a mock login.
+
+Never commit the client ID, client secret, or user pool ID. `.env` is git-ignored, and nothing in
+this repository reads a checked-in credentials file.
 
 ## Run with the local simulator
 
