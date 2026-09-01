@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: aws-java-sso-poc
+  profiles:
+    active: mock
+
+app:
+  sso-mode: mock
+
+server:
+  port: 8080
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

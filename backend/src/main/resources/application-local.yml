@@ -1,0 +1,17 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  security:
+    oauth2:
+      client:
+        registration:
+          cognito:
+            client-id: ${AWS_COGNITO_CLIENT_ID}
+            client-secret: ${AWS_COGNITO_CLIENT_SECRET}
+        provider:
+          cognito:
+            issuer-uri: ${AWS_COGNITO_ISSUER_URI}
+
+app:
+  sso-mode: cognito
