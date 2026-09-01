@@ -70,13 +70,22 @@ Open `http://localhost:5173`. The Vite dev server proxies API and OAuth routes t
 
 ### Browser test with the local simulator
 
+Follow the flow in order:
+
 1. Start the backend with the `mock` profile.
 2. Start the frontend with Vite.
 3. Open `http://localhost:5173`.
-4. Confirm the initial state shows `Awaiting sign-in` and `Local simulator`.
-5. Select **Sign in as demo user**.
-6. Confirm the page shows `Authenticated`, `Demo User`, `demo@example.com`, and `mock-user-001`.
-7. Select **Sign out** and confirm the page returns to the signed-out state.
+4. The first screen confirms that the application is connected to the local simulator and is waiting for an identity.
+
+	![Signed-out state](docs/screenshots/signed-out.png)
+
+5. Select **Sign in as demo user**. The frontend sends a request to `/api/auth/mock-login`, and Spring Security creates the session cookie.
+6. The application returns to the home screen and reports an authenticated session.
+7. Confirm the identity panel displays `Demo User`, `demo@example.com`, and `mock-user-001`.
+
+	![Signed-in state](docs/screenshots/signed-in.png)
+
+8. Select **Sign out** and confirm the page returns to the signed-out state.
 
 ### API test
 
@@ -131,16 +140,7 @@ The production build validates TypeScript and Vite bundling.
 
 ### Capture screenshots
 
-Capture these two states for the POC:
-
-1. **Signed out:** the screen showing `Local simulator` and `Awaiting sign-in`.
-2. **Signed in:** the identity section showing `Demo User`, `demo@example.com`, and the authenticated session.
-
-Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. The committed screenshots are shown below:
-
-![Signed-out state](docs/screenshots/signed-out.png)
-
-![Signed-in state](docs/screenshots/signed-in.png)
+Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. Keep screenshots in `docs/screenshots/` and place each image directly after the numbered test step it documents.
 
 Do not include cookies, access tokens, client secrets, or real user information in screenshots.
 
