@@ -66,4 +66,72 @@ From `frontend/`: `npm install` then `npm run dev`
 
 Open `http://localhost:5173`. The Vite dev server proxies API and OAuth routes to port 8080.
 
-The backend requires Java 17+ and Maven. Java 21 is compatible; Maven is not currently installed on this machine.
+## How to test
+
+### Browser test with the local simulator
+
+1. Start the backend with the `mock` profile.
+2. Start the frontend with Vite.
+3. Open `http://localhost:5173`.
+4. Confirm the initial state shows `Awaiting sign-in` and `Local simulator`.
+5. Select **Sign in as demo user**.
+6. Confirm the page shows `Authenticated`, `Demo User`, `demo@example.com`, and `mock-user-001`.
+7. Select **Sign out** and confirm the page returns to the signed-out state.
+
+### API test
+
+Check backend health:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+Expected response:
+
+```json
+{"status":"UP"}
+```
+
+Test the mock session from PowerShell:
+
+```powershell
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+Invoke-WebRequest http://localhost:8080/api/auth/mock-login -Method POST -WebSession $session
+Invoke-RestMethod http://localhost:8080/api/me -WebSession $session
+```
+
+The protected endpoint should return the demo identity. A request to `/api/me` without the session cookie should be rejected with HTTP `401` or `403`.
+
+### Automated tests
+
+From `backend/`:
+
+```bash
+mvn test
+```
+
+The suite includes controller unit tests and Spring `MockMvc` tests for authentication status, identity claims, and fallback values. From `frontend/`:
+
+```bash
+npm run build
+```
+
+The production build validates TypeScript and Vite bundling.
+
+### Capture screenshots
+
+Capture these two states for the POC:
+
+1. **Signed out:** the screen showing `Local simulator` and `Awaiting sign-in`.
+2. **Signed in:** the identity section showing `Demo User`, `demo@example.com`, and the authenticated session.
+
+Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. Store committed images under `docs/screenshots/` and reference them like this:
+
+```markdown
+![Signed-out state](docs/screenshots/signed-out.png)
+![Signed-in state](docs/screenshots/signed-in.png)
+```
+
+Do not include cookies, access tokens, client secrets, or real user information in screenshots.
+
+The backend requires Java 17+ and Maven. Java 21 is compatible.
