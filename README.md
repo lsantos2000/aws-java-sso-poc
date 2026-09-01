@@ -351,13 +351,13 @@ this image as it stands.**
 **The backend log stream is unauthenticated.** See [Backend log streaming](#backend-log-streaming)
 above. Same reasoning: fine locally, wrong anywhere else.
 
-Neither is hard to fix, and both are planned rather than ignored.
+Both are tracked in the documents below.
 
 ### Where the analysis lives
 
 | Document | What it covers |
 | --- | --- |
-| [docs/REVIEW.md](docs/REVIEW.md) | A full review of the code as it stands: what works, what is missing, what I would build differently. Findings are marked **verified** or **by inspection**, and fixed items say so. |
+| [docs/REVIEW.md](docs/REVIEW.md) | An assessment of the code as it stands: what holds up, what is missing, what I would build differently. Findings are marked **verified** or **by inspection**. |
 | [docs/PLAN-MULTI-APP.md](docs/PLAN-MULTI-APP.md) | Why one backend cannot demonstrate SSO, what a two-app version would look like, what deploying would require, and the hardening list — re-scoped for a local artifact. |
 
 Two questions those documents answer that come up immediately:

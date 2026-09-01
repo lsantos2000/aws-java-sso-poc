@@ -28,9 +28,8 @@ The single most important structural fact: there are **two mutually exclusive se
 `AuthController` echoes `app.sso-mode` (`mock` in `application-mock.yml`, `cognito` in `application-local.yml`) from `GET /api/auth/status`. The frontend's single sign-in button reads that value and branches: `mock` → `POST /api/auth/mock-login` then reload; `cognito` → full-page navigate to `/oauth2/authorization/cognito`. If you add a mode, update both sides plus the `AuthStatus` union type in `frontend/src/main.tsx`.
 
 Until that call answers, `status` is `null` and **there is no sign-in route to offer** — the button
-renders disabled. Do not reintroduce a default branch here: an `else` that assumes Cognito sends
-mock-profile users to an endpoint that does not exist under that profile, which is precisely the
-bug the disabled state prevents.
+renders disabled. Do not add a default branch here. An `else` that assumes Cognito sends
+mock-profile users to an endpoint that does not exist under that profile.
 
 ### Endpoints
 
@@ -53,16 +52,16 @@ Cognito flow: frontend navigates to `/oauth2/authorization/cognito` → hosted U
 itself: `api()` takes a `Recorder` and logs every request, status, and response summary, so the
 handshake is visible as it happens. The **BACKEND** tab is an `EventSource` on `/api/logs/stream`.
 
-Auth lives here, not in the hero — a single button that switches between `signInLabel` and
-"Sign out". There was briefly one button in each place; two controls firing the same action is
-both a design smell and an ambiguous test query. Keep it to one.
+Auth lives here, not in the hero: a single button that switches between `signInLabel` and
+"Sign out". Keep it to one control — two buttons firing the same action are both a design smell
+and an ambiguous test query.
 
-`summarize()` deliberately drops the `claims` key when rendering a response, so the console never
-prints the claim set even though `/api/me` now whitelists it — two independent guards.
+`summarize()` drops the `claims` key when rendering a response, so the console never prints the
+claim set even though `/api/me` whitelists it — two independent guards.
 
-`signOut()` checks the response before clearing state. Clearing unconditionally would render a
-failed logout as a clean sign-out while the server session is still live, which is the most
-misleading direction for that failure to point.
+`signOut()` checks the response before clearing state. Clearing unconditionally renders a failed
+logout as a clean sign-out while the server session is still live, which is the most misleading
+direction for that failure to point.
 
 ### Streaming backend logs
 
@@ -91,22 +90,30 @@ via `JsonErrorWriter`. Every failure therefore leaves the app in one shape, what
 {"status": 401, "error": "Unauthorized", "message": "...", "path": "/api/me"}
 ```
 
-This matters because Spring's default error rendering is content-negotiated: curl received JSON
-while a browser received the HTML Whitelabel page for the same request. Test error behavior with a
-browser-style `Accept: text/html` header or the regression will not reproduce — `ErrorResponseTest`
-does exactly this.
+Spring's default error rendering is content-negotiated: curl sees JSON while a browser sees the
+HTML Whitelabel page for the same request. Test error behaviour with a browser-style
+`Accept: text/html` header, or a regression here will not reproduce — `ErrorResponseTest` does
+exactly this.
 
 Two details to preserve. Under the non-mock profile only `/api/**` gets the JSON 401; everything
 else keeps `oauth2Login`'s redirect entry point, because a browser hitting a protected page should
-still be sent to the hosted UI. And under `mock`, requests to `/oauth2/**` return a message naming
-the active profile — that path has no filter behind it in this profile, so a bare 403 is unhelpable.
+still be sent to the hosted UI. Under `mock`, requests to `/oauth2/**` return a message naming the
+active profile — that path has no filter behind it in this profile, so a bare 403 explains
+nothing.
 
 Because `anyRequest().authenticated()` runs before dispatch, an anonymous request to an unknown path
 is a 401, not a 404. Only authenticated callers can reach a real 404.
 
 ### Route proxying is duplicated in two places
 
-`/api`, `/oauth2`, `/login`, `/logout` are proxied to port 8080 by **both** `frontend/vite.config.ts` (dev server) and `frontend/nginx.conf` (the Docker image). Adding an OAuth-related path prefix means editing both, or it will work in `npm run dev` and 404 under `docker compose`.
+`/api`, `/oauth2`, `/login`, `/logout`, `/actuator` are proxied to port 8080 by **both**
+`frontend/vite.config.ts` (dev server) and `frontend/nginx.conf` (the Docker image). Adding a path
+prefix means editing both, or it works in `npm run dev` and 404s under `docker compose`.
+
+`nginx.conf` gives `/api/logs/` its own location block with `proxy_buffering off`,
+`proxy_http_version 1.1`, and an empty `Connection` header. Server-Sent Events need all three:
+nginx buffers proxied responses and speaks HTTP/1.0 upstream by default, so without them the
+console's BACKEND tab works under Vite and stays silently empty under `docker compose`.
 
 ### Layout is built to fit one viewport
 
