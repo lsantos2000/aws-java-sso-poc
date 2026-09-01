@@ -136,12 +136,11 @@ Capture these two states for the POC:
 1. **Signed out:** the screen showing `Local simulator` and `Awaiting sign-in`.
 2. **Signed in:** the identity section showing `Demo User`, `demo@example.com`, and the authenticated session.
 
-Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. Store committed images under `docs/screenshots/` and reference them like this:
+Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. The committed screenshots are shown below:
 
-```markdown
 ![Signed-out state](docs/screenshots/signed-out.png)
+
 ![Signed-in state](docs/screenshots/signed-in.png)
-```
 
 Do not include cookies, access tokens, client secrets, or real user information in screenshots.
 
