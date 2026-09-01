@@ -1,5 +1,8 @@
 backend/target/
-frontend/node_modules/
+node_modules/
+# scripts/screenshots.mjs installs Playwright at the repo root; keep that out of the repo.
+/package-lock.json
+/package.json
 frontend/dist/
 *.tsbuildinfo
 .env

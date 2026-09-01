@@ -5,7 +5,12 @@ spring:
     active: mock
 
 app:
-  sso-mode: mock
+  # sso-mode is set per profile (application-mock.yml / application-local.yml); AuthController
+  # falls back to "cognito" so the safe value wins if a profile forgets to declare it.
+  # Publishes server logs to any caller that can reach /api/logs/**, so it stays off
+  # unless a profile opts in. See application-mock.yml.
+  log-stream:
+    enabled: false
 
 server:
   port: 8080

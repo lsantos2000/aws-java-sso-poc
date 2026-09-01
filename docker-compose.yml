@@ -2,13 +2,23 @@ services:
   backend:
     build: ./backend
     environment:
+      # Explicit, not inherited. The mock profile enables passwordless sign-in and the log
+      # stream; both are local-development affordances.
       SPRING_PROFILES_ACTIVE: mock
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
 
   frontend:
     build: ./frontend
     depends_on:
-      - backend
+      backend:
+        # Without the condition, nginx starts first and proxies 502s until Spring finishes booting.
+        condition: service_healthy
     ports:
       - "5173:80"

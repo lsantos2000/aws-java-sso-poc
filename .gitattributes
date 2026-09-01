@@ -1,0 +1,17 @@
+# Normalise line endings so Windows and CI agree. Without this, every commit from a
+# Windows checkout reports "LF will be replaced by CRLF".
+* text=auto eol=lf
+
+# Binary assets must never be normalised.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff  binary
+*.woff2 binary
+*.jar binary
+
+# Wrapper scripts keep their platform endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf

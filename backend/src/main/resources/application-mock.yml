@@ -5,3 +5,5 @@ spring:
 
 app:
   sso-mode: mock
+  log-stream:
+    enabled: true
