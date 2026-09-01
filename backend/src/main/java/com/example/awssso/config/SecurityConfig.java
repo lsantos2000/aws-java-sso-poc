@@ -23,7 +23,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/error", "/actuator/health", "/api/auth/status", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers("/", "/error", "/actuator/health", "/api/auth/status", "/api/auth/logout", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/me").authenticated()
                 .anyRequest().authenticated())
             .oauth2Login(oauth -> oauth.defaultSuccessUrl("http://localhost:5173", true))

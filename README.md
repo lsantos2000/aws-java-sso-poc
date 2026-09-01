@@ -68,24 +68,51 @@ Open `http://localhost:5173`. The Vite dev server proxies API and OAuth routes t
 
 ## How to test
 
+### Run with Docker Compose
+
+With Docker installed, run this from the project root:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:5173` and use the local simulator. Stop the stack with `Ctrl+C`, or run `docker compose down` from another terminal.
+
 ### Browser test with the local simulator
 
-Follow the flow in order:
+Follow the flow in order. The screenshots below show the expected application state at each important moment.
 
 1. Start the backend with the `mock` profile.
+
+	From the project root, run this in Terminal 1:
+
+	```bash
+	cd backend
+	mvn spring-boot:run -Dspring-boot.run.profiles=mock
+	```
+
 2. Start the frontend with Vite.
+
+	In a separate Terminal 2, run:
+
+	```bash
+	cd frontend
+	npm install
+	npm run dev
+	```
+
 3. Open `http://localhost:5173`.
-4. The first screen confirms that the application is connected to the local simulator and is waiting for an identity.
+4. The opening screen shows the local simulator waiting for an identity.
 
-	![Signed-out state](docs/screenshots/signed-out.png)
+   <img src="docs/screenshots/signed-out.png" alt="AWS Java SSO POC signed-out state" width="100%" />
 
-5. Select **Sign in as demo user**. The frontend sends a request to `/api/auth/mock-login`, and Spring Security creates the session cookie.
+5. Select **Sign in as demo user**. The frontend calls `/api/auth/mock-login`, and Spring Security creates the session cookie.
 6. The application returns to the home screen and reports an authenticated session.
 7. Confirm the identity panel displays `Demo User`, `demo@example.com`, and `mock-user-001`.
 
-	![Signed-in state](docs/screenshots/signed-in.png)
+   <img src="docs/screenshots/signed-in.png" alt="AWS Java SSO POC signed-in state" width="100%" />
 
-8. Select **Sign out** and confirm the page returns to the signed-out state.
+8. Select **Sign out**. The frontend calls `/api/auth/logout`, Spring Security invalidates the session, and the page returns to the signed-out state.
 
 ### API test
 
@@ -130,18 +157,17 @@ From `backend/`:
 mvn test
 ```
 
-The suite includes controller unit tests and Spring `MockMvc` tests for authentication status, identity claims, and fallback values. From `frontend/`:
+The suite includes controller unit tests, Spring `MockMvc` tests, and HTTP end-to-end tests for authentication status, identity claims, session cookies, protected endpoints, and logout. From `frontend/`:
 
 ```bash
+npm test
 npm run build
 ```
 
-The production build validates TypeScript and Vite bundling.
+`npm test` runs the React/jsdom unit tests for signed-out, authenticated, and logout states. The production build validates TypeScript and Vite bundling. GitHub Actions runs all backend and frontend checks on pushes and pull requests targeting `main`.
 
-### Capture screenshots
+### Maintainer notes
 
-Use your operating system screenshot shortcut or the browser developer tools device toolbar to capture desktop and mobile layouts. Keep screenshots in `docs/screenshots/` and place each image directly after the numbered test step it documents.
-
-Do not include cookies, access tokens, client secrets, or real user information in screenshots.
+The committed screenshots are generated from the local mock flow with Playwright and stored in `docs/screenshots/`. If you replace them, capture both signed-out and signed-in states in desktop and mobile layouts. Do not include cookies, access tokens, client secrets, or real user information.
 
 The backend requires Java 17+ and Maven. Java 21 is compatible.

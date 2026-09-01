@@ -52,6 +52,7 @@ From `frontend/`:
 ```powershell
 npm install
 npm run dev
+npm test
 npm run build
 ```
 
@@ -75,8 +76,10 @@ Java 17+ is required. Java 21 is known to be installed in the current environmen
 
 ## Validation Expectations
 
-For frontend changes, run `npm run build` from `frontend/`.
+For frontend changes, run `npm test` and `npm run build` from `frontend/`.
 
 For backend changes, run `mvn test` from `backend/` when Maven is available. At minimum, verify that the application compiles and that authentication status and authenticated user behavior remain covered by tests.
+
+For container changes, run `docker compose up --build` from the project root and verify the mock flow at `http://localhost:5173`.
 
 This is a POC. Before production use, review session storage, cookie security, CSRF strategy, logout behavior, secrets management, redirect validation, observability, and deployment topology.

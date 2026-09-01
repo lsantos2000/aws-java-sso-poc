@@ -22,7 +22,7 @@ public class MockSecurityConfig {
             .cors(cors -> cors.configurationSource(mockCorsConfigurationSource()))
             .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/error", "/actuator/health", "/api/auth/status", "/api/auth/mock-login").permitAll()
+                .requestMatchers("/", "/error", "/actuator/health", "/api/auth/status", "/api/auth/mock-login", "/api/auth/logout").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/me").authenticated()
                 .anyRequest().authenticated())
             .logout(logout -> logout.logoutSuccessUrl("http://localhost:5173"));

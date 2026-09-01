@@ -11,7 +11,7 @@ async function api<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-function App() {
+export function App() {
   const [status, setStatus] = useState<AuthStatus | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState('');
@@ -24,6 +24,12 @@ function App() {
     }).catch(() => setError('Start the Spring Boot backend on port 8080 to connect.'));
   }, []);
 
+  const signOut = async () => {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    setUser(null);
+    setStatus({ authenticated: false, mode: status?.mode ?? 'mock' });
+  };
+
   return <main className="shell">
     <nav className="nav"><span className="mark">AWS / JAVA</span><span className="nav-note">SSO LAB · POC 01</span></nav>
     <section className="hero">
@@ -31,7 +37,7 @@ function App() {
       <h1>One identity.<br /><em>Every service.</em></h1>
       <p className="intro">A small proving ground for AWS Cognito SSO, Spring Security, and a session-backed Java API.</p>
       <div className="actions">
-        {status?.authenticated ? <button className="primary" onClick={() => { window.location.href = '/logout'; }}>Sign out <span>↗</span></button> : <button className="primary" onClick={async () => { if (status?.mode === 'mock') { await fetch('/api/auth/mock-login', { method: 'POST', credentials: 'include' }); window.location.reload(); } else { window.location.href = '/oauth2/authorization/cognito'; } }}>{status?.mode === 'mock' ? 'Sign in as demo user' : 'Continue with AWS SSO'} <span>↗</span></button>}
+        {status?.authenticated ? <button className="primary" onClick={signOut}>Sign out <span>↗</span></button> : <button className="primary" onClick={async () => { if (status?.mode === 'mock') { await fetch('/api/auth/mock-login', { method: 'POST', credentials: 'include' }); window.location.reload(); } else { window.location.href = '/oauth2/authorization/cognito'; } }}>{status?.mode === 'mock' ? 'Sign in as demo user' : 'Continue with AWS SSO'} <span>↗</span></button>}
         <a className="secondary" href="http://localhost:8080/actuator/health" target="_blank" rel="noreferrer">API health <span>↗</span></a>
       </div>
       {error && <p className="error">{error}</p>}
@@ -46,4 +52,7 @@ function App() {
   </main>;
 }
 
-createRoot(document.getElementById('root')!).render(<StrictMode><App /></StrictMode>);
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(<StrictMode><App /></StrictMode>);
+}

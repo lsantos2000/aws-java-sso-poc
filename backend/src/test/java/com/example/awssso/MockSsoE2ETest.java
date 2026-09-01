@@ -59,6 +59,24 @@ class MockSsoE2ETest {
         assertTrue(List.of(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN).contains(userResponse.getStatusCode()));
     }
 
+    @Test
+    void logoutInvalidatesMockSession() {
+        ResponseEntity<Void> loginResponse = restTemplate.postForEntity(
+            "/api/auth/mock-login", null, Void.class);
+        String sessionCookie = sessionCookie(loginResponse);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add(HttpHeaders.COOKIE, sessionCookie);
+        HttpEntity<Void> request = new HttpEntity<>(requestHeaders);
+
+        ResponseEntity<Void> logoutResponse = restTemplate.exchange(
+            "/api/auth/logout", HttpMethod.POST, request, Void.class);
+        ResponseEntity<String> userResponse = restTemplate.exchange(
+            "/api/me", HttpMethod.GET, request, String.class);
+
+        assertEquals(HttpStatus.OK, logoutResponse.getStatusCode());
+        assertTrue(List.of(HttpStatus.UNAUTHORIZED, HttpStatus.FORBIDDEN).contains(userResponse.getStatusCode()));
+    }
+
     private String sessionCookie(ResponseEntity<?> response) {
         String setCookie = response.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         assertNotNull(setCookie, "Mock login should create a session cookie");
